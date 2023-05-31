@@ -6,11 +6,11 @@ import * as packageJson from '../package.json';
 export class AppService {
   getInfo(): object {
     return {
-      site: "玖叁的漫画站",
+      site: '玖叁的漫画站',
       app: packageJson.name,
       version: packageJson.version,
       repository: packageJson.repository,
-      homepage: packageJson.homepage
+      homepage: packageJson.homepage,
     };
   }
 }

@@ -1,3 +1,4 @@
+import { StorageDriver } from 'src/manage/storage/storage.dto';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -6,7 +7,7 @@ export class Storage {
   id: number;
 
   @Column()
-  driver: 's3' | 'local' | 'webdav';
+  driver: StorageDriver;
 
   @Column({ unique: true })
   name: string;

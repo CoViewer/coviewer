@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { S3ClientConfig, PutObjectCommand, S3Client, ListObjectsCommand, ListObjectsCommandOutput} from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client, ListObjectsCommand, ListObjectsCommandOutput} from '@aws-sdk/client-s3';
 
 export interface IStorageDriverService {
   upload(file: Buffer, path: string): Promise<string | null>;
@@ -19,10 +19,7 @@ export class S3StorageDriverService implements IStorageDriverService {
   private s3Client: S3Client;
   private bucketConfig: BucketConfig;
 
-  constructor(bucketConfig: BucketConfig) {
-    this.s3Client = new S3Client();
-    this.bucketConfig = bucketConfig;
-  }
+  constructor(bucketConfig: BucketConfig) {}
 
   async demo(): Promise<ListObjectsCommandOutput> {
 

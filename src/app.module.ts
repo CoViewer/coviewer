@@ -19,10 +19,11 @@ import { Setting } from './entity/setting.entity';
 
 // 控制器
 import { ManageModule } from './manage/manage.module';
-import { APP_FILTER, APP_INTERCEPTOR, RouterModule } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE, RouterModule } from '@nestjs/core';
 import { appRoutes } from './app.routes';
 import { CustomExceptionFilter } from './custom-exception.filter';
 import { TransformResponseInterceptor } from './transform-response.interceptor';
+import { ValidationPipe } from './validate.pipe';
 
 @Module({
   imports: [
@@ -50,6 +51,10 @@ import { TransformResponseInterceptor } from './transform-response.interceptor';
     {
       provide: APP_FILTER,
       useClass: CustomExceptionFilter,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe
     },
     {
       provide: APP_INTERCEPTOR,

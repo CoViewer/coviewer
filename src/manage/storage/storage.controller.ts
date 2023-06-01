@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { StorageService } from './storage.service';
+import { StorageDto } from './storage.dto';
 import { Storage } from 'src/entity/storage.entity';
-import { TransformResponseInterceptor } from 'src/transform-response.interceptor';
 
 @Controller()
 export class StorageController {
@@ -13,7 +23,16 @@ export class StorageController {
   }
 
   @Post('add')
-  addStorage(@Body() data: Storage): object {
-    return this.storageSerivce.addStorage(data);
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
+  addStorage(@Body() data: StorageDto): object {
+    const storageData: Storage = {
+      ...data,
+      addition: JSON.stringify(data.addition),
+    };
+    return this.storageSerivce.addStorage(storageData);
   }
 }

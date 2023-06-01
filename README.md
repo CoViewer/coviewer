@@ -1,73 +1,101 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# CoViewer
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+基于 **Nest.js** 的漫画等图片集合管理系统，提供 Web 前端、Android 客户端* 等多种客户端。
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> *sooooooooooon
 
-## Description
+> 下面都是坑
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 计划功能
 
-## Installation
+### 管理
 
-```bash
-$ npm install
+- 存储支持:
+
+    - 本机存储
+    - WebDav
+    - AList
+    - 阿里云 OSS
+    - 腾讯云 COS
+
+- 添加 (导入) 支持: 
+
+    - 通过 storage 目录导入
+    - 通过 storage 目录批量导入
+    - 通过 storage 目录自动监听导入
+    - 通过上传压缩包导入
+    - 通过上传压缩包批量导入
+    - 手动新建并上传文件导入
+    - 通过 APP 上传目录导入
+    - 通过 APP 自动监听目录导入
+
+- 信息与标签:
+
+    - 缩略图、标题、作者、tag 等信息手动录入
+    - e-hentai URL 导入
+    - e-hentai 下载格式支持
+    - EhViewer 下载格式支持
+
+- 权限控制:
+
+    - 类 AList 元数据
+    - 用户
+
+- 后台任务管理:
+
+    - 缩略图生成
+    - 上传同步
+
+### 用户
+
+- 体验优化:
+
+    - 缩略图生成与使用
+    - 未来页预加载
+    - 阅读进度记忆 (登陆时为云同步，游客为本地记忆)
+
+- 阅读器:
+
+    - 手势支持
+    - 快捷键支持 (APP，如音量键翻页)
+
+## 特殊说明
+
+### 关于漫画的创建与导入的逻辑
+
+比如此时有如下路径结构的漫画
+
+```
+ demo
+    |-- comic
+        |-- Demo Comic 1
+        |   |-- 0001.png
+        |   |-- 0002.png
+        |   |-- 0003.png
+        |   |-- 0004.png
+        |-- Demo Comic 2
+            |-- 0001.png
+            |-- 0002.png
+            |-- 0003.png
+            |-- 0004.png
 ```
 
-## Running the app
+其中
 
-```bash
-# development
-$ npm run start
+若欲从 `comic` 导入子目录下所有漫画（如 `Demo Comic 1` 和 `Demo Comic 2`），则应使用 `从父文件夹导入多个漫画`；
 
-# watch mode
-$ npm run start:dev
+若欲批量导入 `Demo Comic 1` 和 `Demo Comic 2`，则应使用 `从文件夹导入多个漫画`；
 
-# production mode
-$ npm run start:prod
-```
+而 `创建漫画` 则是新建一个空的项目。
 
-## Test
+### 关于标签
 
-```bash
-# unit tests
-$ npm run test
+标签格式为 `name:value`，如 `artist:xxxx`、`translator:xxxx`、`language:Chinese` 等类似于 E-hentai 的标签。
 
-# e2e tests
-$ npm run test:e2e
+### 关于元信息的权限控制
 
-# test coverage
-$ npm run test:cov
-```
+采用 **密码唯一** 的 **标签黑白名单** 规则集方案，如创建一个密码为 `93`，白名单标签 `male:males only` 的规则时，使用密码 `93` 登录后，只能查看该标签下的漫画。
 
-## Support
+### 关于缩略图
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+缩略图 id 和 图片 id 相同。

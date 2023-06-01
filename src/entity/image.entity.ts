@@ -6,6 +6,9 @@ export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'file_name' })
+  fileName: string;
+
   // 所属漫画
   @ManyToOne(() => Comic)
   comic: string;
@@ -14,4 +17,8 @@ export class Image {
   // TODO: 在考虑要不要把缩略图单独数据库出来
   @Column({ type: 'blob' })
   thumb: Buffer;
+
+  @Column({ unique: true })
+  hash: string;
+
 }

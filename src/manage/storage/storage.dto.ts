@@ -8,6 +8,7 @@ import {
   registerDecorator,
   ValidationArguments,
   validateSync,
+  IsDefined,
 } from 'class-validator';
 
 function IsConfigValid(validationOptions?: ValidationOptions) {
@@ -20,26 +21,70 @@ function IsConfigValid(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: any, args: ValidationArguments) {
           const { driver } = args.object as StorageDto;
-          switch (driver) {
-            case 's3':
-              console.log(new S3Config(value));
-              if (validateSync(new S3Config(value)).length != 0) {
-                console.log(validateSync(new S3Config(value)));
-                throw new BadRequestException('Invalid S3 configuration');
+          switch (propertyName) {
+            case 'connection':
+              switch (driver) {
+                case 's3':
+                  if (!value || validateSync(new S3Config(value)).length != 0) {
+                    throw new BadRequestException('Invalid S3 configuration');
+                  }
+                  break;
+                case 'local':
+                  if (
+                    !value ||
+                    validateSync(new LocalConfig(value)).length != 0
+                  ) {
+                    throw new BadRequestException(
+                      'Invalid Local configuration',
+                    );
+                  }
+                  break;
+                case 'webdav':
+                  if (
+                    !value ||
+                    validateSync(new WebDavConfig(value)).length != 0
+                  ) {
+                    throw new BadRequestException(
+                      'Invalid WebDAV configuration',
+                    );
+                  }
+                  break;
+                default:
+                  throw new BadRequestException('Invalid driver:' + driver);
               }
               break;
-            case 'local':
-              if (validateSync(new LocalConfig(value)).length != 0) {
-                throw new BadRequestException('Invalid Local configuration');
+            case 'addition':
+              switch (driver) {
+                case 's3':
+                  if (
+                    !value ||
+                    validateSync(new S3Addition(value)).length != 0
+                  ) {
+                    throw new BadRequestException('Invalid S3 addition');
+                  }
+                  break;
+                case 'local':
+                  if (
+                    !value ||
+                    validateSync(new LocalAddition(value)).length != 0
+                  ) {
+                    throw new BadRequestException('Invalid Local addition');
+                  }
+                  break;
+                case 'webdav':
+                  if (
+                    !value ||
+                    validateSync(new WebDavAddition(value)).length != 0
+                  ) {
+                    throw new BadRequestException('Invalid WebDAV addition');
+                  }
+                  break;
+                default:
+                  throw new BadRequestException('Invalid driver:' + driver);
               }
-              break;
-            case 'webdav':
-              if (validateSync(new WebDavConfig(value)).length != 0) {
-                throw new BadRequestException('Invalid WebDAV configuration');
-              }
-              break;
+
             default:
-              throw new BadRequestException('Invalid driver:' + driver);
+              break;
           }
           return true;
         },
@@ -64,6 +109,7 @@ export class S3ConfigCredentials {
 }
 
 export class S3Config {
+  @IsDefined()
   @ValidateNested()
   credentials: S3ConfigCredentials;
 
@@ -76,18 +122,37 @@ export class S3Config {
   endpoint: string;
 
   constructor(data: S3Config) {
-    this.credentials = new S3ConfigCredentials(data.credentials);
+    if (data.credentials)
+      this.credentials = new S3ConfigCredentials(data.credentials);
     this.region = data.region;
     this.endpoint = data.endpoint;
   }
 }
 
-export class LocalConfig {
+class LocalConfig {
   constructor(data: LocalConfig) {}
 }
 
-export class WebDavConfig {
+class WebDavConfig {
   constructor(data: WebDavConfig) {}
+}
+
+export class S3Addition {
+  @IsNotEmpty()
+  @IsString()
+  bucket: string;
+
+  constructor(data: S3Addition) {
+    this.bucket = data.bucket;
+  }
+}
+
+export class LocalAddition {
+  constructor(data: LocalAddition) {}
+}
+
+export class WebDavAddition {
+  constructor(data: WebDavAddition) {}
 }
 
 export class StorageDto {
@@ -104,8 +169,18 @@ export class StorageDto {
 
   @IsConfigValid()
   @ValidateNested()
-  addition: StorageAdditionConfig;
+  connection: StorageConnectionConfig;
+
+  @IsDefined()
+  @IsConfigValid()
+  @ValidateNested()
+  addition?: StorageAdditionConfig;
+}
+
+export class StorageDetailDto extends StorageDto {
+  comicCount: number;
 }
 
 export type StorageDriver = 's3' | 'local' | 'webdav';
-type StorageAdditionConfig = S3Config | LocalConfig | WebDavConfig;
+type StorageConnectionConfig = S3Config | LocalConfig | WebDavConfig;
+type StorageAdditionConfig = S3Addition | LocalAddition | WebDavAddition;

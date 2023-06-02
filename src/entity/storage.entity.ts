@@ -12,6 +12,9 @@ export class Storage {
   @Column({ unique: true })
   name: string;
 
-  @Column()
-  addition: string;
+  @Column({ nullable: true })
+  connection?: string;
+
+  @Column({ nullable: true })
+  addition?: string;
 }

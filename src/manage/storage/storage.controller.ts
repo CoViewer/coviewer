@@ -10,7 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { StorageDto } from './storage.dto';
+import { StorageDetailDto, StorageDto } from './storage.dto';
 import { Storage } from 'src/entity/storage.entity';
 
 @Controller()
@@ -22,6 +22,11 @@ export class StorageController {
     return this.storageSerivce.getInfo();
   }
 
+  @Get('list')
+  getStorageList(): Promise<StorageDetailDto[]> {
+    return this.storageSerivce.getStorageList();
+  }
+
   @Post('add')
   @UsePipes(
     new ValidationPipe({
@@ -31,6 +36,7 @@ export class StorageController {
   addStorage(@Body() data: StorageDto): object {
     const storageData: Storage = {
       ...data,
+      connection: JSON.stringify(data.connection),
       addition: JSON.stringify(data.addition),
     };
     return this.storageSerivce.addStorage(storageData);

@@ -9,6 +9,9 @@ import {
   ValidationArguments,
   validateSync,
   IsDefined,
+  IsUrl,
+  IsBoolean,
+  IsNumber,
 } from 'class-validator';
 
 function IsConfigValid(validationOptions?: ValidationOptions) {
@@ -29,25 +32,18 @@ function IsConfigValid(validationOptions?: ValidationOptions) {
                     throw new BadRequestException('Invalid S3 configuration');
                   }
                   break;
-                case 'local':
-                  if (
-                    !value ||
-                    validateSync(new LocalConfig(value)).length != 0
-                  ) {
-                    throw new BadRequestException(
-                      'Invalid Local configuration',
-                    );
-                  }
-                  break;
                 case 'webdav':
                   if (
                     !value ||
-                    validateSync(new WebDavConfig(value)).length != 0
+                    validateSync(new WebDAVConfig(value)).length != 0
                   ) {
                     throw new BadRequestException(
                       'Invalid WebDAV configuration',
                     );
                   }
+                  break;
+
+                case 'local':
                   break;
                 default:
                   throw new BadRequestException('Invalid driver:' + driver);
@@ -63,21 +59,8 @@ function IsConfigValid(validationOptions?: ValidationOptions) {
                     throw new BadRequestException('Invalid S3 addition');
                   }
                   break;
-                case 'local':
-                  if (
-                    !value ||
-                    validateSync(new LocalAddition(value)).length != 0
-                  ) {
-                    throw new BadRequestException('Invalid Local addition');
-                  }
-                  break;
                 case 'webdav':
-                  if (
-                    !value ||
-                    validateSync(new WebDavAddition(value)).length != 0
-                  ) {
-                    throw new BadRequestException('Invalid WebDAV addition');
-                  }
+                case 'local':
                   break;
                 default:
                   throw new BadRequestException('Invalid driver:' + driver);
@@ -118,7 +101,7 @@ export class S3Config {
   region: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   endpoint: string;
 
   constructor(data: S3Config) {
@@ -129,12 +112,22 @@ export class S3Config {
   }
 }
 
-class LocalConfig {
-  constructor(data: LocalConfig) {}
-}
+export class WebDAVConfig {
+  @IsNotEmpty()
+  @IsUrl()
+  address: string;
 
-class WebDavConfig {
-  constructor(data: WebDavConfig) {}
+  @IsString()
+  username?: string;
+
+  @IsString()
+  password?: string;
+
+  constructor(data: WebDAVConfig) {
+    this.address = data.address;
+    this.username = data.username;
+    this.password = data.password;
+  }
 }
 
 export class S3Addition {
@@ -142,17 +135,13 @@ export class S3Addition {
   @IsString()
   bucket: string;
 
+  @IsBoolean()
+  signed?: boolean;
+
   constructor(data: S3Addition) {
     this.bucket = data.bucket;
+    this.signed = data.signed;
   }
-}
-
-export class LocalAddition {
-  constructor(data: LocalAddition) {}
-}
-
-export class WebDavAddition {
-  constructor(data: WebDavAddition) {}
 }
 
 export class StorageDto {
@@ -169,18 +158,28 @@ export class StorageDto {
 
   @IsConfigValid()
   @ValidateNested()
-  connection: StorageConnectionConfig;
+  connection?: StorageConnectionConfig;
 
-  @IsDefined()
   @IsConfigValid()
   @ValidateNested()
   addition?: StorageAdditionConfig;
+}
+
+export class StorageUpdateDto extends StorageDto {
+  @IsNumber()
+  id: number;
 }
 
 export class StorageDetailDto extends StorageDto {
   comicCount: number;
 }
 
+export class StorageQuery {
+  @IsNumber()
+  @IsNotEmpty()
+  id: number;
+}
+
 export type StorageDriver = 's3' | 'local' | 'webdav';
-type StorageConnectionConfig = S3Config | LocalConfig | WebDavConfig;
-type StorageAdditionConfig = S3Addition | LocalAddition | WebDavAddition;
+type StorageConnectionConfig = S3Config | WebDAVConfig;
+type StorageAdditionConfig = S3Addition;

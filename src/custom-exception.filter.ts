@@ -20,6 +20,8 @@ export class CustomExceptionFilter implements ExceptionFilter {
     let msg = message;
     let data = {};
 
+    if (exception.status) statusCode = exception.status;
+
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus() || statusCode;
 

@@ -1,5 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { S3StorageDriverService } from './driver.service';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  S3StorageDriverService,
+  WebDAVStorageDriverService,
+} from './driver/driver.service';
 import { Storage } from 'src/entity/storage.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
@@ -13,22 +21,7 @@ export class StorageService {
     @InjectRepository(Comic) private readonly comic: Repository<Comic>,
   ) {}
 
-  async getInfo(): Promise<object> {
-    const id = 10;
-
-    const storage = (await this.storage.findBy({ id }))[0];
-
-    let s3 = new S3StorageDriverService(
-      JSON.parse(storage.connection),
-      JSON.parse(storage.addition),
-    );
-
-    let result = await s3.headBucket();
-
-    return result;
-  }
-
-  async addStorage(storage: Storage): Promise<object> {
+  async validStorage(storage: Storage): Promise<boolean> {
     // 校验连接
     switch (storage.driver) {
       case 's3':
@@ -38,36 +31,28 @@ export class StorageService {
         );
         await s3.headBucket();
         break;
+      case 'webdav':
+        const webdav = new WebDAVStorageDriverService(
+          JSON.parse(storage.connection),
+        );
+        await webdav.valid();
+        break;
+      case 'local':
+        if (await this.storage.countBy({ driver: 'local' }))
+          throw new HttpException('The local storage already exists', 409);
+        break;
       default:
         break;
     }
+    return true;
+  }
 
-    // 存入数据库
+  async addStorage(storage: Storage): Promise<object> {
+    await this.validStorage(storage);
     return await this.storage.save(storage);
   }
 
   async getStorageList(): Promise<StorageDetailDto[]> {
-
-    // 多次查询方法
-    // // 存储列表
-    // const result = await this.storage.find().then(async (data) => {
-    //   const promises = data.map(async (e) => {
-
-    //     const comics = await this.comic.findAndCountBy({
-    //       storage: e.id,
-    //     });
-    //     return {
-    //       ...e,
-    //       comicCount: comics[1] as number,
-    //       connection: JSON.parse(e.connection) as object,
-    //       addition: JSON.parse(e.addition) as object,
-    //     };
-    //   });
-    //   return Promise.all(promises);
-    // });
-
-    // return result as StorageDetailDto[];
-
     // 单次查询方法
     // code with ChatGPT
     const storageList = await this.storage.find();
@@ -104,5 +89,32 @@ export class StorageService {
     return Array.from(storageMap.values()) as StorageDetailDto[];
   }
 
-  async getStorageInfo() {}
+  async getStorageDetail(storageId: number): Promise<StorageDetailDto> {
+    const storage = await this.storage.findOneBy({ id: storageId });
+
+    if (!storage) {
+      throw new NotFoundException('Storage not found');
+    }
+
+    const comicCount = await this.comic.countBy({ storage: storageId });
+    return {
+      ...storage,
+      connection: JSON.parse(storage.connection),
+      addition: JSON.parse(storage.addition),
+      comicCount,
+    };
+  }
+
+  async updateStorage(storage: Storage): Promise<object> {
+    await this.validStorage(storage);
+    const result = await this.storage.update(storage.id, storage);
+    if (result.affected == 0) throw new HttpException('Storage not found', 404);
+    return {};
+  }
+
+  async deleteStorage(storageId: number): Promise<object> {
+    const result = await this.storage.delete({ id: storageId });
+    if (result.affected == 0) throw new HttpException('Storage not found', 404);
+    return {};
+  }
 }

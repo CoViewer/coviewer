@@ -9,15 +9,19 @@ import {
 export class Temp {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @CreateDateColumn()
-  upload_time: Date;
+  
+  // 当前文件名
+  @Column({ unique: true })
+  name: string;
 
   // 原始文件名
   @Column()
   file_name: string;
 
-  // 当前文件路径
-  @Column()
-  file_path: string;
+  // 文件 hash
+  @Column({ unique: true })
+  sha256: string;
+
+  @CreateDateColumn()
+  upload_time: Date;
 }

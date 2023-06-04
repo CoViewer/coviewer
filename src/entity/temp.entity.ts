@@ -14,13 +14,13 @@ export class Temp {
   name: string;
   
   // 文件后缀
-  @Column()
-  file_ext: string;
+  @Column({ name: 'file_ext' })
+  fileExt: string;
 
   // 文件 hash
   @Column({ unique: true })
   sha256: string;
 
-  @CreateDateColumn()
-  upload_time: Date;
+  @CreateDateColumn({ name: 'upload_time' })
+  uploadTime: Date;
 }

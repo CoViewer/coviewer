@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   HttpException,
   Injectable,
   NotFoundException,
@@ -10,8 +9,8 @@ import {
 } from './driver/driver.service';
 import { Storage } from 'src/entity/storage.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
-import { StorageDetailDto, StorageDto } from './storage.dto';
+import { Repository } from 'typeorm';
+import { StorageDetailDto } from './storage.dto';
 import { Comic } from 'src/entity/comic.entity';
 
 @Injectable()
@@ -89,14 +88,14 @@ export class StorageService {
     return Array.from(storageMap.values()) as StorageDetailDto[];
   }
 
-  async getStorageDetail(storageId: number): Promise<StorageDetailDto> {
-    const storage = await this.storage.findOneBy({ id: storageId });
+  async getStorageDetail(id: number): Promise<StorageDetailDto> {
+    const storage = await this.storage.findOneBy({ id });
 
     if (!storage) {
       throw new NotFoundException('Storage not found');
     }
 
-    const comicCount = await this.comic.countBy({ storage: storageId });
+    const comicCount = await this.comic.countBy({ storage: id });
     return {
       ...storage,
       connection: JSON.parse(storage.connection),
@@ -105,15 +104,15 @@ export class StorageService {
     };
   }
 
-  async updateStorage(storage: Storage): Promise<object> {
-    await this.validStorage(storage);
-    const result = await this.storage.update(storage.id, storage);
+  async updateStorage(data: Storage): Promise<object> {
+    await this.validStorage(data);
+    const result = await this.storage.update(data.id, data);
     if (result.affected == 0) throw new HttpException('Storage not found', 404);
     return {};
   }
 
-  async deleteStorage(storageId: number): Promise<object> {
-    const result = await this.storage.delete({ id: storageId });
+  async deleteStorage(id: number): Promise<object> {
+    const result = await this.storage.delete(id);
     if (result.affected == 0) throw new HttpException('Storage not found', 404);
     return {};
   }

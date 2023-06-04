@@ -6,13 +6,17 @@ import {
   Delete,
   Body,
   Query,
-  UseInterceptors,
   UsePipes,
   ValidationPipe,
   BadRequestException,
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { StorageDetailDto, StorageDto, StorageQuery, StorageUpdateDto } from './storage.dto';
+import {
+  StorageDetailDto,
+  StorageDto,
+  StorageQuery,
+  StorageUpdateDto,
+} from './storage.dto';
 import { Storage } from 'src/entity/storage.entity';
 
 @Controller()

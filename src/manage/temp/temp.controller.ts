@@ -12,8 +12,6 @@ import {
 import { Temp } from 'src/entity/temp.entity';
 import { TempService } from './temp.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { nanoid } from 'nanoid';
-import { createHash } from 'crypto';
 
 @Controller()
 export class TempController {
@@ -32,7 +30,9 @@ export class TempController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadTempFile(@UploadedFile() file: Express.Multer.File): Promise<Temp> {
+  async uploadTempFile(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<Temp> {
     return await this.tempService.uploadTempFile(file);
   }
 

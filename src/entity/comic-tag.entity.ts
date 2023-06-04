@@ -5,7 +5,7 @@ export class ComicTag {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   value: string;
 
   @Column()

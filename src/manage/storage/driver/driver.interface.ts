@@ -22,6 +22,12 @@ export interface IStorageDriverService {
   streamDownload(filePath: string): Promise<ReadableStream | ReadStream | Readable | null>;
 
   /**
+   * 获取目录
+   * @param dir 路径
+   */
+  readDir(dir: string): Promise<string[]>;
+
+  /**
    * 删除文件
    * @param filePath 文件路径
    */

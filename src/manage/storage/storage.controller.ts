@@ -9,6 +9,7 @@ import {
   UsePipes,
   ValidationPipe,
   BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import {
@@ -29,12 +30,18 @@ export class StorageController {
   }
 
   @Get('detail')
-  getStorageDetail(@Query('id') idString: string): Promise<StorageDetailDto> {
-    const id = parseInt(idString, 10);
-    if (isNaN(id)) {
-      throw new BadRequestException("'id' must be number string");
-    }
+  getStorageDetail(
+    @Query('id', ParseIntPipe) id: number,
+  ): Promise<StorageDetailDto> {
     return this.storageSerivce.getStorageDetail(id);
+  }
+
+  @Get('dir')
+  getStorageDir(
+    @Query('id', ParseIntPipe) id: number,
+    @Query('dir') dir: string,
+  ) {
+    return this.storageSerivce.getStorageDir(id, dir);
   }
 
   @Post('add')

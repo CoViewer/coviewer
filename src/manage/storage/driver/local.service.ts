@@ -5,6 +5,16 @@ import { ReadStream } from 'fs';
 
 @Injectable()
 export class LocalStorageDriverService implements IStorageDriverService {
+
+  async upload(file: Buffer, path: string): Promise<string> {
+    try {
+      fs.writeFileSync(path, file);
+      return path;
+    } catch (error) {
+      throw new Error('Failed to upload file');
+    }
+  }
+  
   async bufferDownload(filePath: string): Promise<Buffer> {
     try {
       const fileData = fs.readFileSync(filePath);
@@ -19,13 +29,8 @@ export class LocalStorageDriverService implements IStorageDriverService {
     return fs.createReadStream(filePath)
   }
 
-  async upload(file: Buffer, path: string): Promise<string> {
-    try {
-      fs.writeFileSync(path, file);
-      return path;
-    } catch (error) {
-      throw new Error('Failed to upload file');
-    }
+  async readDir(dir: string): Promise<string[]> {
+    return fs.readdirSync(dir);
   }
 
   async delete(filePath: string): Promise<boolean> {

@@ -8,6 +8,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
 } from '@aws-sdk/client-s3';
 import { S3Addition } from 'src/manage/storage/storage.dto';
 import { IStorageDriverService } from './driver.interface';
@@ -37,8 +38,7 @@ export class S3StorageDriverService implements IStorageDriverService {
         Body: file,
       }),
     );
-    console.log(result);
-    return result ? result.ChecksumSHA1 : null;
+    return result ? result.ChecksumSHA256 : null;
   }
 
   async streamDownload(filePath: string): Promise<ReadableStream> {
@@ -59,6 +59,19 @@ export class S3StorageDriverService implements IStorageDriverService {
       }),
     );
     return Buffer.from((await result.Body.transformToByteArray()).buffer);
+  }
+
+  async readDir(dir: string): Promise<string[]> {
+    const result = await this.s3Client.send(
+      new ListObjectsV2Command({
+        Bucket: this.additionConfig.bucket,
+        Prefix: dir,
+      }),
+    );
+    const objects = result.Contents;
+    const folders = objects.filter((object) => object.Key.endsWith('/'));
+    const files = objects.filter((object) => !object.Key.endsWith('/'));
+    return folders.map((e) => e.Key);
   }
 
   async delete(filePath: string): Promise<boolean> {

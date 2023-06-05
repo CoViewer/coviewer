@@ -16,6 +16,6 @@ export class History {
   @Column()
   page: number;
 
-  @Column({ name: 'update_time' })
+  @Column()
   updateTime: Date;
 }

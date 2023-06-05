@@ -28,10 +28,10 @@ export class Comic {
   @JoinTable()
   tag: ComicTag[];
 
-  @Column({ name: 'publish_date' })
+  @Column()
   publishDate?: Date;
 
-  @CreateDateColumn({ name: 'upload_time' })
+  @CreateDateColumn()
   uploadTime: Date;
 
   // 所在存储驱动器 id

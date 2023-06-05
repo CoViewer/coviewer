@@ -19,6 +19,11 @@ export class WebDAVStorageDriverService implements IStorageDriverService {
     return await this.client.getQuota() ? true : false;
   }
 
+  async upload(file: Buffer, path: string): Promise<string> {
+    await this.client.putFileContents(path, file);
+    return path;
+  }
+
   async bufferDownload(filePath: string): Promise<Buffer> {
     return (await this.client.getFileContents(filePath, {
       format: 'binary',
@@ -26,13 +31,14 @@ export class WebDAVStorageDriverService implements IStorageDriverService {
   }
 
   async streamDownload(filePath: string): Promise<Readable> {
-    const readableStream = this.client.createReadStream(filePath);
-    return readableStream;
+    return this.client.createReadStream(filePath);
   }
 
-  async upload(file: Buffer, path: string): Promise<string> {
-    await this.client.putFileContents(path, file);
-    return path;
+  async readDir(dir: string): Promise<string[]> {
+      const contents = await this.client.getDirectoryContents(dir) as webdav.FileStat[];
+      const folders = contents.filter((object) => object.type == 'directory').map(e => e.basename);
+      const files = contents.filter((object) => object.type == 'file').map(e => e.basename);
+      return folders;
   }
 
   async delete(filePath: string): Promise<boolean> {
@@ -41,12 +47,10 @@ export class WebDAVStorageDriverService implements IStorageDriverService {
   }
 
   async exists(filePath: string): Promise<boolean> {
-    const exists = await this.client.exists(filePath);
-    return exists;
+    return await this.client.exists(filePath);
   }
 
   async getUrl(filePath: string): Promise<string> {
-    const shareLink = await this.client.getFileDownloadLink(filePath);
-    return shareLink;
+    return this.client.getFileDownloadLink(filePath);
   }
 }

@@ -12,6 +12,7 @@ import {
   IsUrl,
   IsBoolean,
   IsNumber,
+  IsOptional,
 } from 'class-validator';
 
 function IsConfigValid(validationOptions?: ValidationOptions) {
@@ -30,6 +31,14 @@ function IsConfigValid(validationOptions?: ValidationOptions) {
                 case 's3':
                   if (!value || validateSync(new S3Config(value)).length != 0) {
                     throw new BadRequestException('Invalid S3 configuration');
+                  }
+                  break;
+                case 'oss':
+                  if (
+                    !value ||
+                    validateSync(new OSSConfig(value)).length != 0
+                  ) {
+                    throw new BadRequestException('Invalid OSS configuration');
                   }
                   break;
                 case 'webdav':
@@ -57,6 +66,14 @@ function IsConfigValid(validationOptions?: ValidationOptions) {
                     validateSync(new S3Addition(value)).length != 0
                   ) {
                     throw new BadRequestException('Invalid S3 addition');
+                  }
+                  break;
+                case 'oss':
+                  if (
+                    !value ||
+                    validateSync(new OSSAddition(value)).length != 0
+                  ) {
+                    throw new BadRequestException('Invalid OSS addition');
                   }
                   break;
                 case 'webdav':
@@ -144,12 +161,65 @@ export class S3Addition {
   }
 }
 
+export class OSSConfig {
+  @IsNotEmpty()
+  @IsString()
+  region: string;
+
+  @IsBoolean()
+  @IsOptional()
+  internal?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  secure?: boolean;
+
+  @IsString()
+  @IsOptional()
+  cname?: string;
+
+  @IsString()
+  bucket: string;
+
+  @IsUrl()
+  @IsOptional()
+  endpoint?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  accessKeyId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  accessKeySecret: string;
+
+  constructor(data: OSSConfig) {
+    this.region = data.region;
+    this.internal = data.internal;
+    this.secure = data.secure;
+    this.cname = data.cname;
+    this.bucket = data.bucket;
+    this.endpoint = data.endpoint;
+    this.accessKeyId = data.accessKeyId;
+    this.accessKeySecret = data.accessKeySecret;
+  }
+}
+
+export class OSSAddition {
+  @IsBoolean()
+  @IsOptional()
+  signed?: boolean;
+  constructor(data: OSSAddition) {
+    this.signed = data.signed;
+  }
+}
+
 export class StorageDto {
   id: number;
 
   @IsNotEmpty()
   @IsString()
-  @IsIn(['s3', 'local', 'webdav'])
+  @IsIn(['s3', 'oss', 'local', 'webdav'])
   driver: StorageDriver;
 
   @IsNotEmpty()
@@ -180,6 +250,6 @@ export class StorageQuery {
   id: number;
 }
 
-export type StorageDriver = 's3' | 'local' | 'webdav';
-type StorageConnectionConfig = S3Config | WebDAVConfig;
-type StorageAdditionConfig = S3Addition;
+export type StorageDriver = 's3' | 'oss' | 'local' | 'webdav';
+type StorageConnectionConfig = S3Config | OSSConfig | WebDAVConfig;
+type StorageAdditionConfig = S3Addition | OSSAddition;

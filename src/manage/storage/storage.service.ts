@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import {
+  LocalStorageDriverService,
+  OSSStroageDriverService,
   S3StorageDriverService,
   WebDAVStorageDriverService,
 } from './driver/driver.service';
@@ -12,12 +15,40 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StorageDetailDto } from './storage.dto';
 import { Comic } from 'src/entity/comic.entity';
+import { IStorageDriverService } from './driver/driver.interface';
+
+@Injectable()
+export class StorageDriverFactory {
+  createStorage(storage: Storage): IStorageDriverService {
+    switch (storage.driver) {
+      case 's3':
+        return new S3StorageDriverService(
+          JSON.parse(storage.connection),
+          JSON.parse(storage.addition),
+        );
+      case 'oss':
+        return new OSSStroageDriverService(
+          JSON.parse(storage.connection),
+          JSON.parse(storage.addition),
+        );
+      case 'webdav':
+        return new WebDAVStorageDriverService(JSON.parse(storage.connection));
+      case 'local':
+        return new LocalStorageDriverService();
+      default:
+        throw new BadRequestException(
+          'Invalid storage driver: ' + storage.driver,
+        );
+    }
+  }
+}
 
 @Injectable()
 export class StorageService {
   constructor(
     @InjectRepository(Storage) private readonly storage: Repository<Storage>,
     @InjectRepository(Comic) private readonly comic: Repository<Comic>,
+    private readonly storageDriverFactory: StorageDriverFactory,
   ) {}
 
   async validStorage(storage: Storage): Promise<boolean> {
@@ -29,6 +60,14 @@ export class StorageService {
           JSON.parse(storage.addition),
         );
         await s3.headBucket();
+        break;
+      case 'oss':
+        const oss = new OSSStroageDriverService(
+          JSON.parse(storage.connection),
+          JSON.parse(storage.addition),
+        );
+        const a = await oss.head();
+        console.log(a);
         break;
       case 'webdav':
         const webdav = new WebDAVStorageDriverService(
@@ -102,6 +141,14 @@ export class StorageService {
       addition: JSON.parse(storage.addition),
       comicCount,
     };
+  }
+
+  async getStorageDir(id: number, dir: string): Promise<string[]> {
+    const storageConfig = await this.storage.findOneBy({ id });
+    const storage = this.storageDriverFactory.createStorage(storageConfig);
+    // console.log(storage);
+    // console.log(storageConfig);
+    return await storage.readDir(dir);
   }
 
   async updateStorage(data: Storage): Promise<object> {

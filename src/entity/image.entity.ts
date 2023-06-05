@@ -4,6 +4,7 @@ import {
   ManyToOne,
   BeforeInsert,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Comic } from './comic.entity';
 import { nanoid } from 'nanoid';
@@ -18,14 +19,16 @@ export class Image {
   fileName: string;
 
   // 所属漫画
-  @ManyToOne(() => Comic)
-  comic: string;
+  @ManyToOne(() => Comic, { cascade: true, onDelete: 'CASCADE' })
+  comic: number;
 
   @Column({ unique: true })
   sha256: string;
 
   @BeforeInsert()
-  generateId() {
-    this.id = nanoid();
+  generateIdIfNull() {
+    if (!this.id) {
+      this.id = nanoid();
+    }
   }
 }

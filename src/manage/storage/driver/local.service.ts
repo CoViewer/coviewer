@@ -9,13 +9,13 @@ export class LocalStorageDriverService implements IStorageDriverService {
   async upload(file: Buffer | string, path: string): Promise<null> {
     try {
       if (typeof file == 'string') {
-        fs.copyFileSync(file, resolve(path));
+        fs.copyFileSync(resolve(file), resolve(path));
       } else {
         fs.writeFileSync(resolve(path), file);
       }
       return null;
     } catch (error) {
-      throw new Error('Failed to upload file');
+      throw new Error('Failed to upload file' + error);
     }
   }
 

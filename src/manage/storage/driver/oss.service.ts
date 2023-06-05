@@ -36,7 +36,7 @@ export class OSSStroageDriverService implements IStorageDriverService {
   ): Promise<null> {
     for (let i = 0; i < files.length; i++) {
       const { file, name } = files[i];
-      await this.upload(file, resolve(path, name));
+      await this.upload(file, path + name);
     }
     return null;
   }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { createHash } from 'crypto';
 import * as fs from 'fs/promises';
 import { nanoid } from 'nanoid';
@@ -37,14 +38,16 @@ export class TempService {
     const sha256 = createHash('sha256').update(buffer).digest('hex');
     let result = await this.temp.findOneBy({ sha256 });
     if (!result) {
-      const name = nanoid();
+      const id = nanoid();
       await fs.mkdir(path.join('temp', 'file'), { recursive: true });
-      await fs.writeFile(path.join('temp', 'file', name), file.buffer);
-      result = await this.temp.save({
-        name,
-        fileExt,
-        sha256,
-      });
+      await fs.writeFile(path.join('temp', 'file', id), file.buffer);
+      result = await this.temp.save(
+        plainToClass(Temp, {
+          id,
+          fileExt,
+          sha256,
+        }),
+      );
     }
     return result;
   }

@@ -1,18 +1,17 @@
+import { nanoid } from 'nanoid';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  PrimaryColumn,
+  BeforeInsert,
 } from 'typeorm';
 
 @Entity()
 export class Temp {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  id: string;
 
-  @Column({ unique: true })
-  name: string;
-  
   // 文件后缀
   @Column()
   fileExt: string;
@@ -23,4 +22,11 @@ export class Temp {
 
   @CreateDateColumn()
   uploadTime: Date;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = nanoid();
+    }
+  }
 }

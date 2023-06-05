@@ -26,12 +26,16 @@ export class CustomExceptionFilter implements ExceptionFilter {
       statusCode = exception.getStatus() || statusCode;
 
       // 请求体校验失败
-      if (statusCode == 400) data = exception.getResponse();
+      if (statusCode == HttpStatus.BAD_REQUEST) data = exception.getResponse();
     } else if (exception instanceof Error) {
       // 项目冲突
       if (message.includes('UNIQUE constraint failed')) {
         msg = 'Item conflict';
         statusCode = HttpStatus.CONFLICT;
+      }
+      if (message.includes('FOREIGN KEY constraint failed')) {
+        msg = 'Some keys do not meet the relational requirements';
+        statusCode = HttpStatus.BAD_REQUEST;
       }
     }
 

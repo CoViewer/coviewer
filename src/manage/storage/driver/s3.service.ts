@@ -51,7 +51,7 @@ export class S3StorageDriverService implements IStorageDriverService {
     let result = [];
     for (let i = 0; i < files.length; i++) {
       const { file, name } = files[i];
-      result.push(await this.upload(file, resolve(path, name)));
+      result.push(await this.upload(file,  path + name));
     }
     return result;
   }

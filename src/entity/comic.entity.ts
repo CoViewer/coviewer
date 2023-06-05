@@ -20,11 +20,11 @@ export class Comic {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   title: string;
 
   @Column({ type: 'simple-array' })
-  @ManyToMany(() => ComicTag)
+  @ManyToMany(() => ComicTag, { cascade: true, onDelete: 'CASCADE' })
   @JoinTable()
   tag: ComicTag[];
 
@@ -44,13 +44,10 @@ export class Comic {
 
   // 包含的图片，其中进行级联
   @Column({ type: 'simple-array' })
-  @OneToMany(() => Image, (image) => image.comic, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => Image, (image) => image.comic)
   image: Image[];
 
-  @OneToOne(() => Image)
+  @ManyToOne(() => Image)
   cover: Image;
 
   @Column({ default: 0 })
@@ -63,5 +60,8 @@ export class Comic {
   beforeInsertAndUpdate(): void {
     if (this.tag) this.tag = Array.from(new Set(this.tag));
     if (this.image) this.image = Array.from(new Set(this.image));
+    if (!this.cover) this.cover = this.image[0];
+    if (typeof this.publishDate != 'object')
+      this.publishDate = new Date(this.publishDate);
   }
 }

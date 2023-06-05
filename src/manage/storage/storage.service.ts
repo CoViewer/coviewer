@@ -154,13 +154,13 @@ export class StorageService {
   async updateStorage(data: Storage): Promise<object> {
     await this.validStorage(data);
     const result = await this.storage.update(data.id, data);
-    if (result.affected == 0) throw new HttpException('Storage not found', 404);
+    if (result.affected == 0) throw new NotFoundException('Storage not found');
     return {};
   }
 
   async deleteStorage(id: number): Promise<object> {
     const result = await this.storage.delete(id);
-    if (result.affected == 0) throw new HttpException('Storage not found', 404);
+    if (result.affected == 0) throw new NotFoundException('Storage not found');
     return {};
   }
 }

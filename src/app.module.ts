@@ -19,17 +19,23 @@ import { Setting } from './entity/setting.entity';
 
 // 控制器
 import { ManageModule } from './manage/manage.module';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE, RouterModule } from '@nestjs/core';
+import {
+  APP_FILTER,
+  APP_INTERCEPTOR,
+  APP_PIPE,
+  RouterModule,
+} from '@nestjs/core';
 import { appRoutes } from './app.routes';
 import { CustomExceptionFilter } from './custom-exception.filter';
 import { TransformResponseInterceptor } from './transform-response.interceptor';
 import { ValidationPipe } from './validate.pipe';
+import { Thumb } from './entity/thumb.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: config.database.db_file || 'data/data.db',
+      database: config.data.database.db_file || 'data/data.db',
       entities: [
         Setting,
         Comic,
@@ -43,6 +49,13 @@ import { ValidationPipe } from './validate.pipe';
       ],
       synchronize: true,
     }),
+    TypeOrmModule.forRoot({
+      name: 'thumb',
+      type: 'sqlite',
+      database: config.thumb.database.db_file || 'data/thumb.db',
+      entities: [Thumb],
+      synchronize: true,
+    }),
     ManageModule,
     RouterModule.register(appRoutes),
   ],
@@ -54,7 +67,7 @@ import { ValidationPipe } from './validate.pipe';
     },
     {
       provide: APP_PIPE,
-      useClass: ValidationPipe
+      useClass: ValidationPipe,
     },
     {
       provide: APP_INTERCEPTOR,

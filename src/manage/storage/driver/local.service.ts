@@ -2,19 +2,34 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import { IStorageDriverService } from './driver.interface';
 import { ReadStream } from 'fs';
+import { resolve } from 'path';
 
 @Injectable()
 export class LocalStorageDriverService implements IStorageDriverService {
-
-  async upload(file: Buffer, path: string): Promise<string> {
+  async upload(file: Buffer | string, path: string): Promise<null> {
     try {
-      fs.writeFileSync(path, file);
-      return path;
+      if (typeof file == 'string') {
+        fs.copyFileSync(file, resolve(path));
+      } else {
+        fs.writeFileSync(resolve(path), file);
+      }
+      return null;
     } catch (error) {
       throw new Error('Failed to upload file');
     }
   }
-  
+
+  async uploadMany(
+    files: { name: string; file: Buffer | string }[],
+    path: string,
+  ): Promise<null> {
+    for (let i = 0; i < files.length; i++) {
+      const { file, name } = files[i];
+      await this.upload(file, resolve(path, name));
+    }
+    return null;
+  }
+
   async bufferDownload(filePath: string): Promise<Buffer> {
     try {
       const fileData = fs.readFileSync(filePath);
@@ -26,7 +41,7 @@ export class LocalStorageDriverService implements IStorageDriverService {
 
   // TODO: 感觉会有问题
   async streamDownload(filePath: string): Promise<ReadStream> {
-    return fs.createReadStream(filePath)
+    return fs.createReadStream(filePath);
   }
 
   async readDir(dir: string): Promise<string[]> {

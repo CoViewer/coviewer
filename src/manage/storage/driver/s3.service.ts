@@ -13,6 +13,8 @@ import {
 import { S3Addition } from 'src/manage/storage/storage.dto';
 import { IStorageDriverService } from './driver.interface';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { resolve } from 'path';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class S3StorageDriverService implements IStorageDriverService {
@@ -30,15 +32,28 @@ export class S3StorageDriverService implements IStorageDriverService {
     );
   }
 
-  async upload(file: Buffer, path: string): Promise<string | null> {
+  async upload(file: Buffer | string, path: string): Promise<string> {
+    const Body = typeof file == 'string' ? createReadStream(file) : file;
     const result = await this.s3Client.send(
       new PutObjectCommand({
         Bucket: this.additionConfig.bucket,
         Key: path,
-        Body: file,
+        Body,
       }),
     );
     return result ? result.ChecksumSHA256 : null;
+  }
+
+  async uploadMany(
+    files: { name: string; file: Buffer | string }[],
+    path: string,
+  ): Promise<string[]> {
+    let result = [];
+    for (let i = 0; i < files.length; i++) {
+      const { file, name } = files[i];
+      result.push(await this.upload(file, resolve(path, name)));
+    }
+    return result;
   }
 
   async streamDownload(filePath: string): Promise<ReadableStream> {

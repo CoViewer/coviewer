@@ -1,5 +1,5 @@
-import { ReadStream } from "fs";
-import { Readable } from "stream";
+import { ReadStream } from 'fs';
+import { Readable } from 'stream';
 
 export interface IStorageDriverService {
   /**
@@ -7,7 +7,18 @@ export interface IStorageDriverService {
    * @param file 二进制数据
    * @param path 欲保存路径
    */
-  upload(file: Buffer, path: string): Promise<string | null>;
+  upload(file: Buffer | string, path: string): Promise<string | null>;
+
+  /**
+   * 批量上传文件
+   * @param files
+   * @param path 保存父目录
+   */
+  uploadMany(
+    files: { name: string; file: Buffer | string }[],
+    path: string,
+  ): Promise<string[] | null>;
+  // TODO: 这儿返回啥啊啊啊啊
 
   /**
    * 获取文件二进制缓冲区数据
@@ -19,7 +30,9 @@ export interface IStorageDriverService {
    * 获取文件二进制可读流数据
    * @param filePath 文件路径
    */
-  streamDownload(filePath: string): Promise<ReadableStream | ReadStream | Readable | null>;
+  streamDownload(
+    filePath: string,
+  ): Promise<ReadableStream | ReadStream | Readable | null>;
 
   /**
    * 获取目录

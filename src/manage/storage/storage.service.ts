@@ -134,7 +134,8 @@ export class StorageService {
       throw new NotFoundException('Storage not found');
     }
 
-    const comicCount = await this.comic.countBy({ storage: id });
+    const comicCount = storage.comic.length;
+    // const comicCount = await this.comic.countBy({ storage: id });
     return {
       ...storage,
       connection: JSON.parse(storage.connection),
@@ -144,10 +145,7 @@ export class StorageService {
   }
 
   async getStorageDir(id: number, dir: string): Promise<string[]> {
-    const storageConfig = await this.storage.findOneBy({ id });
-    const storage = this.storageDriverFactory.createStorage(storageConfig);
-    // console.log(storage);
-    // console.log(storageConfig);
+    const storage = await this.createStorageById(id);
     return await storage.readDir(dir);
   }
 
@@ -163,4 +161,14 @@ export class StorageService {
     if (result.affected == 0) throw new NotFoundException('Storage not found');
     return {};
   }
+
+  // ==
+
+  async createStorageById(id: number) : Promise<IStorageDriverService> {
+    const storageConfig = await this.storage.findOneBy({ id });
+    if (!storageConfig) {
+      throw new NotFoundException('Storage not found');
+    }
+    return this.storageDriverFactory.createStorage(storageConfig);
+  } 
 }

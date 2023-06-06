@@ -24,7 +24,6 @@ export class TempService {
       .select('temp.id, temp.sha256')
       .where('temp.sha256 IN (:...sha256List)', { sha256List });
     const results = await queryBuilder.getRawMany();
-    console.log(results);
     const idArray = sha256List.map((sha256) => {
       const result = results.find((item) => item.sha256 === sha256);
       return result ? result.id : null;

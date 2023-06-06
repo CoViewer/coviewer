@@ -39,6 +39,7 @@
     "nanoid": "^3.3.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "sharp": "^0.32.1",
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.16",
     "webdav": "^4.11.2"

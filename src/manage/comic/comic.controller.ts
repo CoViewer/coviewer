@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Comic } from 'src/entity/comic.entity';
 import { ComicService } from './comic.service';
-import { ComicQuery } from './comic.dto';
+import { ComicDto, ComicQuery } from './comic.dto';
 
 @Controller()
 export class ComicController {
@@ -32,12 +32,12 @@ export class ComicController {
   }
 
   @Post('add')
-  addComic(@Body() data: Comic) {
+  addComic(@Body() data: ComicDto) {
     return this.comicService.addComic(data);
   }
 
   @Delete('delete')
-  deleteComic(@Body() data: ComicQuery ): Promise<object> {
+  deleteComic(@Body() data: ComicQuery): Promise<object> {
     return this.comicService.deleteComic(data.id);
   }
 }

@@ -6,6 +6,9 @@ export class Thumb {
   @PrimaryColumn()
   id: string;
 
+  @Column()
+  sha256: string;
+
   // 缩略图的二进制数据
   @Column({ type: 'blob' })
   thumb: Buffer;

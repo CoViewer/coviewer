@@ -26,7 +26,7 @@ export class Comic {
   @Column({ type: 'simple-array' })
   @ManyToMany(() => ComicTag, { cascade: true, onDelete: 'CASCADE' })
   @JoinTable()
-  tag: ComicTag[];
+  tags: ComicTag[];
 
   @Column()
   publishDate?: Date;
@@ -35,8 +35,8 @@ export class Comic {
   uploadTime: Date;
 
   // 所在存储驱动器 id
-  @ManyToOne(() => Storage)
-  storage: number;
+  @ManyToOne(() => Storage, (storage) => storage.comic)
+  storage: Storage;
 
   // 存储的位置
   @Column()
@@ -45,7 +45,7 @@ export class Comic {
   // 包含的图片，其中进行级联
   @Column({ type: 'simple-array' })
   @OneToMany(() => Image, (image) => image.comic)
-  image: Image[];
+  images: Image[];
 
   @ManyToOne(() => Image)
   cover: Image;
@@ -58,9 +58,9 @@ export class Comic {
   @BeforeInsert()
   @BeforeUpdate()
   beforeInsertAndUpdate(): void {
-    if (this.tag) this.tag = Array.from(new Set(this.tag));
-    if (this.image) this.image = Array.from(new Set(this.image));
-    if (!this.cover) this.cover = this.image[0];
+    if (this.tags) this.tags = Array.from(new Set(this.tags));
+    if (this.images) this.images = Array.from(new Set(this.images));
+    if (!this.cover) this.cover = this.images[0];
     if (typeof this.publishDate != 'object')
       this.publishDate = new Date(this.publishDate);
   }

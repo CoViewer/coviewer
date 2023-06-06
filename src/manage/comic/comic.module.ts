@@ -7,9 +7,10 @@ import { Comic } from 'src/entity/comic.entity';
 import { Temp } from 'src/entity/temp.entity';
 import { Image } from 'src/entity/image.entity';
 import { Storage } from 'src/entity/storage.entity';
+import { ThumbModule } from './thumb/thumb.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comic, Temp, Storage, Image]), TagModule],
+  imports: [TypeOrmModule.forFeature([Comic, Temp, Storage, Image]), TagModule, ThumbModule],
   controllers: [ComicController],
   providers: [ComicService],
 })

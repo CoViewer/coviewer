@@ -19,7 +19,7 @@ export class Image {
   fileName: string;
 
   // 所属漫画
-  @ManyToOne(() => Comic, { cascade: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Comic, (comic) => comic.images, { cascade: true, onDelete: 'CASCADE' })
   comic: number;
 
   @Column({ unique: true })

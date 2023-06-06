@@ -1,5 +1,6 @@
 import { StorageDriver } from 'src/manage/storage/storage.dto';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Comic } from './comic.entity';
 
 @Entity()
 export class Storage {
@@ -17,4 +18,8 @@ export class Storage {
 
   @Column({ nullable: true })
   addition?: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  @OneToMany(() => Comic, (comic) => comic.storage)
+  comic?: Comic[];
 }

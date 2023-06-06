@@ -8,6 +8,10 @@
 
 ## 计划功能
 
+# 注
+
+缩略图生成依赖 [`sharp`](https://sharp.pixelplumbing.com/) 包，此包依赖 `libvps`。
+
 ### 管理
 
 - 存储支持:

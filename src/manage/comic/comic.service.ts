@@ -15,6 +15,7 @@ import * as path from 'path';
 import { Image } from 'src/entity/image.entity';
 import { createHash } from 'crypto';
 import { ComicDto } from './comic.dto';
+import { ThumbService } from './thumb/thumb.service';
 
 @Injectable()
 export class ComicService {
@@ -23,24 +24,34 @@ export class ComicService {
     @InjectRepository(Storage) private readonly storage: Repository<Storage>,
     @InjectRepository(Image) private readonly image: Repository<Image>,
     @InjectRepository(Temp) private readonly temp: Repository<Temp>,
+    private readonly thumbService: ThumbService,
   ) {}
 
   async getComicList(pageSize: number, offset: number): Promise<Comic[]> {
     return await this.comic
       .createQueryBuilder('comic')
-      .leftJoinAndSelect('comic.storage', 'storage')
-      .select(['comic', 'storage.id', 'storage.name'])
-      .leftJoinAndSelect('comic.cover', 'image')
-      .addSelect(['comic', 'image.id'])
       .orderBy('comic.uploadTime', 'DESC')
       .skip(offset)
       .take(pageSize)
+      .leftJoinAndSelect('comic.storage', 'storage')
+      .select(['comic', 'storage.id', 'storage.name'])
+      .leftJoinAndSelect('comic.tags', 'comic_tag')
+      .leftJoinAndSelect('comic.cover', 'image')
+      // .addSelect(['comic', 'image.id'])
       .getMany();
   }
 
   async getComicDetail(id: number): Promise<Comic> {
-    const result = await this.comic.findOneBy({ id });
-    if (!result) throw new NotFoundException("Comic not found");
+    const result = await this.comic
+      .createQueryBuilder('comic')
+      .where({ id })
+      .leftJoinAndSelect('comic.storage', 'storage')
+      .select(['comic', 'storage.id', 'storage.name'])
+      .leftJoinAndSelect('comic.tags', 'comic_tag')
+      .leftJoinAndSelect('comic.images', 'image')
+      .addSelect(['tags', 'images'])
+      .getOne();
+    if (!result) throw new NotFoundException('Comic not found');
     return result;
   }
 
@@ -75,8 +86,7 @@ export class ComicService {
     if (tempFiles.length != data.images.length)
       throw new NotFoundException(
         'There are temp files cannot found: ' +
-          data.images
-            .filter((e) => !tempFiles.map((f) => f.id).includes(e)),
+          data.images.filter((e) => !tempFiles.map((f) => f.id).includes(e)),
       );
 
     // 获取已经存储的图片 防止重复
@@ -122,9 +132,12 @@ export class ComicService {
     await this.image
       .createQueryBuilder()
       .update(Image)
-      .set({ comic: comic.id })
+      .set({ comic })
       .whereInIds(images.map((e) => e.id))
       .execute();
+
+    // TODO: 添加到后台任务
+    await this.thumbService.updateComicThumb(comic.id);
 
     return comic;
   }

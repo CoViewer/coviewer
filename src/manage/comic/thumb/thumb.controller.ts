@@ -16,7 +16,12 @@ export class ThumbController {
   constructor(private thumbService: ThumbService) {}
 
   @Post('update')
-  updateComicThumb(@Body() data: ThumbQuery) {
+  updateComicThumb(@Body() data: ThumbQuery): Promise<string[]> {
     return this.thumbService.updateComicThumb(data.id);
+  }
+
+  @Post('update_images')
+  updateImagesThumb(@Body() data: string[]): Promise<string[]> {
+    return this.thumbService.updateImagesThumb(data);
   }
 }

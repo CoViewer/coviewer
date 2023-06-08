@@ -20,7 +20,7 @@ export class Image {
 
   // 所属漫画
   @ManyToOne(() => Comic, (comic) => comic.images, { cascade: true, onDelete: 'CASCADE' })
-  comic: number;
+  comic: Comic;
 
   @Column({ unique: true })
   sha256: string;

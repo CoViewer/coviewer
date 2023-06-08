@@ -5,9 +5,11 @@ import * as sharp from 'sharp';
 import { Comic } from 'src/entity/comic.entity';
 import { Image } from 'src/entity/image.entity';
 import { Thumb } from 'src/entity/thumb.entity';
+import { IStorageDriverService } from 'src/manage/storage/driver/driver.interface';
 import { StorageService } from 'src/manage/storage/storage.service';
 import { In, Repository } from 'typeorm';
 
+// TODO: 添加到后台任务
 @Injectable()
 export class ThumbService {
   constructor(
@@ -17,7 +19,7 @@ export class ThumbService {
     private readonly storageService: StorageService,
   ) {}
 
-  async updateComicThumb(comicId: number): Promise<object> {
+  async updateComicThumb(comicId: number): Promise<string[]> {
     // 获取漫画实体
     // 主要是获取存储信息
     const comic = await this.comic.findOne({
@@ -39,7 +41,7 @@ export class ThumbService {
       nonThumbImageIds.includes(e.id),
     );
 
-    if (nonThumbImages.length == 0) return {};
+    if (nonThumbImages.length == 0) return [];
 
     // 存储器
     const storage = await this.storageService.createStorageById(
@@ -49,25 +51,55 @@ export class ThumbService {
     // 遍历需要生成缩略图的
     for (let i = 0; i < nonThumbImages.length; i++) {
       const image = nonThumbImages[i];
-      const filePath = comic.path + image.fileName;
-      const imageBuffer = await storage.bufferDownload(filePath);
-      const thumbBuffer = await sharp(imageBuffer)
-        .resize({ width: 100 })
-        .toBuffer();
-      await this.thumb.upsert(
-        plainToClass(Thumb, {
-          id: image.id,
-          sha256: image.sha256,
-          thumb: thumbBuffer,
-        }),
-        ['id'],
-      );
+      await this.updateThumbByImageEntity(image, comic, storage);
     }
 
     return nonThumbImageIds;
   }
 
+  async updateImagesThumb(imageIds: string[]): Promise<string[]> {
+    const images = await this.image.find({
+      where: {
+        id: In(imageIds),
+      },
+      relations: {
+        comic: {
+          storage: true,
+        },
+      },
+    });
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      await this.updateThumbByImageEntity(image);
+    }
+    return [];
+  }
+
   //==
+
+  async updateThumbByImageEntity(
+    image: Image,
+    comic?: Comic,
+    storage?: IStorageDriverService,
+  ): Promise<object> {
+    storage =
+      storage ||
+      (await this.storageService.createStorageById(image.comic.storage.id));
+    comic = comic || image.comic;
+    const filePath = comic.path + image.fileName;
+    const imageBuffer = await storage.bufferDownload(filePath);
+    const thumbBuffer = await sharp(imageBuffer)
+      .resize({ width: 100 })
+      .toBuffer();
+    return await this.thumb.upsert(
+      plainToClass(Thumb, {
+        id: image.id,
+        sha256: image.sha256,
+        thumb: thumbBuffer,
+      }),
+      ['id'],
+    );
+  }
 
   async getNonMatchingImageIds(ids: string[]): Promise<string[]> {
     const images = await this.image

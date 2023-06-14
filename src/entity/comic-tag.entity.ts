@@ -9,5 +9,8 @@ export class ComicTag {
   value: string;
 
   @Column()
+  rules?: string;
+
+  @Column()
   name: string;
 }

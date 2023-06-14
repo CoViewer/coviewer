@@ -58,3 +58,51 @@
 ## 元信息策略
 
 采用 **密码唯一** 的 **标签黑白名单** 规则集方案，如创建一个密码为 `93`，白名单标签 `male:males only` 的规则时，使用密码 `93` 登录后，只能查看该标签下的漫画。
+
+## 自动导入策略
+
+### 文件夹监听
+
+通过 `driver` 提供的 `watch` 方法，监听子文件夹 `rename` 和 `change`，同时，通过在文件夹中生成的 `coviewer-config.json` 来识别于漫画的绑定关系（优先级最高）。
+
+### 从目录名自动识别信息
+
+有如下示例文件名 (EhViewer)
+
+```
+1159196-(FF30) [Wild Style (Takemoto Arashi)] WARM UP [Chinese]
+
+1167755-[アイディバイド (ガンマカオス)] 霊獣石アンバーキューブ [中国翻訳]
+
+2460718-[中文] 友情突破-EP1 [树生汉化]
+```
+
+其中正则格式为 `id-标题`，tag 通过自定义规则来识别。
+
+如 `language:Chinese` 实体可以为
+
+```json
+{
+    "id": 1,
+    "value": "language:Chinese",
+    "name": "中文",
+    "rules": [
+        {
+            "type": "includes",
+            "data": [
+                "chinese",
+                "Chinese",
+                "中文",
+                "汉化",
+                "翻译",
+                "翻訳"
+            ]
+        },
+        {
+            "type": "regex",
+            "data": [
+                "/chinese/"
+            ]
+        }
+    ]
+}

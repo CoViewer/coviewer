@@ -9,6 +9,7 @@ import * as config from '../data/config.json';
 // ORM 实体
 import { Comic } from './entity/comic.entity';
 import { ComicTag } from './entity/comic-tag.entity';
+import { ComicTagRule } from './entity/comic-tag-rule.entity';
 import { Image } from './entity/image.entity';
 import { Temp } from './entity/temp.entity';
 import { Storage } from './entity/storage.entity';
@@ -16,6 +17,8 @@ import { Meta } from './entity/meta.entity';
 import { History } from './entity/history.entity';
 import { User } from './entity/user.entity';
 import { Setting } from './entity/setting.entity';
+
+import { Thumb } from './entity/thumb.entity';
 
 // 控制器
 import { ManageModule } from './manage/manage.module';
@@ -29,7 +32,6 @@ import { appRoutes } from './app.routes';
 import { CustomExceptionFilter } from './custom-exception.filter';
 import { TransformResponseInterceptor } from './transform-response.interceptor';
 import { ValidationPipe } from './validate.pipe';
-import { Thumb } from './entity/thumb.entity';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { Thumb } from './entity/thumb.entity';
         Setting,
         Comic,
         ComicTag,
+        ComicTagRule,
         Image,
         Temp,
         Storage,

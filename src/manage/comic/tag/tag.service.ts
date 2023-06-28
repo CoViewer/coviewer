@@ -11,7 +11,10 @@ export class TagService {
   ) {}
 
   async getTagList(): Promise<ComicTag[]> {
-    return await this.comicTag.find();
+    return this.comicTag
+      .createQueryBuilder('comicTag')
+      .leftJoinAndSelect('comicTag.rules', 'rules')
+      .getMany();
   }
 
   async addTag(data: ComicTagDto): Promise<ComicTag> {

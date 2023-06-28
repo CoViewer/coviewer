@@ -89,20 +89,19 @@
     "rules": [
         {
             "type": "includes",
-            "data": [
-                "chinese",
-                "Chinese",
-                "中文",
-                "汉化",
-                "翻译",
-                "翻訳"
-            ]
+            "value": "chinese"
+        },
+        {
+            "type": "includes",
+            "value": "Chinese"
+        },
+        {
+            "type": "includes",
+            "value": "中文"
         },
         {
             "type": "regex",
-            "data": [
-                "/chinese/"
-            ]
+            "value": "/chinese/"
         }
     ]
 }

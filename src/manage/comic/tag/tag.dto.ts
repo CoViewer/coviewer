@@ -8,6 +8,7 @@ import {
   IsDefined,
   IsNumber,
 } from 'class-validator';
+import { ComicTagRule } from 'src/entity/comic-tag-rule.entity';
 
 function IsValueValid(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
@@ -39,6 +40,8 @@ export class ComicTagDto {
   @IsString()
   @IsValueValid()
   value: string;
+
+  rules: ComicTagRule[];
 
   @IsNotEmpty()
   @IsDefined()

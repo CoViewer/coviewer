@@ -63,7 +63,30 @@
 
 ### 文件夹监听
 
-通过 `driver` 提供的 `watch` 方法，监听子文件夹 `rename` 和 `change`，同时，通过在文件夹中生成的 `coviewer-config.json` 来识别于漫画的绑定关系（优先级最高）。
+监听文件夹变更（目前仅支持本地存储），同时，通过在文件夹中生成的 `.coviewer-config.json` 来识别于漫画的绑定关系（优先级最高）。
+
+#### `.coviewer-config.json`
+
+`data.id` 为记录在 `image` 数据库中的对应 `id`，该字段可选存在，如不存在，则意味着该图片*仅存在于存储目录中*，而并没有注册在数据库中。
+
+```json
+{
+    "id": 1,
+    "created": 1688600768140,
+    "lastModified": 1688600768140,
+    "data": [
+        {
+            "id": "e1-qLkYnL3bypK3yP0Vzt",
+            "fileName": "000001.png",
+            "sha256": "84dcc0a8ac83e4f697b9d30d15b63c02c87a07876b123a9dcce994dd2f917fb3"
+        },
+        {
+            "fileName": "000002.png",
+            "sha256": "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"
+        }
+    ]
+}
+```
 
 ### 从目录名自动识别信息
 

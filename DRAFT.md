@@ -61,7 +61,7 @@
 
 ## 自动导入策略
 
-### 文件夹监听
+### 内部文件夹监听
 
 监听文件夹变更（目前仅支持本地存储），同时，通过在文件夹中生成的 `.coviewer-config.json` 来识别于漫画的绑定关系（优先级最高）。
 
@@ -87,6 +87,14 @@
     ]
 }
 ```
+
+```mermaid
+graph LR
+start[监听事件触发] -- 重命名 --> rename[修改对应 fileName] -- 有id --> finish[修改数据库 image]
+start -- 新建 --> newOrChange[获取并修改 sha256] -- 有id --> finish
+start -- 覆盖 --> newOrChange -- 有id --> finish
+```
+
 
 ### 从目录名自动识别信息
 
